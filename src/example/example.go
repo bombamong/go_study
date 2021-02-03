@@ -7,6 +7,8 @@ func main() {
 	printRotatedPyramid()
 	fmt.Println()
 	printPyramid()
+	a, b := returnIntAndFloat(1, 1.1)
+	fmt.Println(a, b)
 
 }
 
@@ -47,4 +49,8 @@ func printPyramid() {
 		fmt.Println()
 
 	}
+}
+
+func returnIntAndFloat(num1 int, num2 float64) (int, float64) {
+	return num1, num2
 }

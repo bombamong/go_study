@@ -1,6 +1,4 @@
-
-
-***PROBLEM FROM LEETCODE***
+**_PROBLEM FROM LEETCODE_**
 
 > We define a harmonious array as an array where the difference between its maximum value and its minimum value is exactly 1.
 > Given an integer array nums, return the length of its longest harmonious subsequence among all its possible subsequences.
@@ -20,7 +18,7 @@ Input: nums = [1,1,1,1]
 Output: 0
 
 **Constraints:**
-1 <= nums.length <= 2 * 104
+1 <= nums.length <= 2 \* 104
 -109 <= nums[i] <= 109
 
 ```go
@@ -31,7 +29,7 @@ func findLHS(nums []int) int {
   //sort nums
   sort.Ints(nums)
 
-  //Iterate nums 
+  //Iterate nums
   for i, v := range nums {
     max := v
     length := 0

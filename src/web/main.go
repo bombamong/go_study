@@ -6,7 +6,11 @@ import (
 	"net/http"
 )
 
+//PORT of server
+const PORT string = "3000"
+
 func main() {
-	fmt.Println("Server is up listening on PORT: 8080...")
-	http.ListenAndServe(":3001", myapp.NewHttpHandler())
+
+	fmt.Printf("Server is up listening on PORT: %s...\n", PORT)
+	http.ListenAndServe(":"+PORT, myapp.NewHttpHandler())
 }

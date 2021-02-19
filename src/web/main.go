@@ -1,9 +1,10 @@
 package main
 
 import (
-	"Go/src/myapp"
 	"fmt"
 	"net/http"
+
+	"github.com/bombamong/go_study/src/myapp"
 )
 
 //PORT of server

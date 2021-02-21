@@ -14,6 +14,8 @@
 
 ## My solution
 
+**_GO version_**
+
 ```go
 func solution(n int, lost []int, reserve []int) int {
     // 참여 못하는 학생 수를 담는 변수
@@ -54,5 +56,36 @@ func indexOf(s []int, d int) int {
         }
     }
     return  -1
+}
+```
+
+**_JS version_**
+
+```js
+function solution(n, lost, reserve) {
+  // 배열에 잃어버린 사람은 0, 여벌 가지고 있는 사람은 2로 변경
+  let answer = new Array(n + 1).fill(1);
+  lost.forEach(e => answer[e]--);
+  reserve.forEach(e => answer[e]++);
+
+  // 배열 0번째 제거, 학생은 1부터 시작함
+  answer[0] = 0;
+
+  // 체육복이 없고 옆에사람 두개 있으면 뺏어오기
+  for (let idx = 1; idx < answer.length; idx++) {
+    if (answer[idx] < 1) {
+      if (answer[idx - 1] > 1) {
+        answer[idx - 1]--;
+        answer[idx]++;
+      } else if (answer[idx + 1] > 1) {
+        answer[idx + 1]--;
+        answer[idx]++;
+      }
+    }
+  }
+
+  // 체육복 있는 사람 다 더하기, 지금까지 두개 가지고 있는 사람은 못 나눠줬기 때문에 1인분
+  answer = answer.reduce((acc, curr) => (acc += curr > 1 ? 1 : curr));
+  return answer;
 }
 ```

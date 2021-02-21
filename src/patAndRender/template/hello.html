@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ partial "title"}}</title>
+  <style>
+  #root {
+    min-height: 100vh;
+    color: blue;
+    background-color: lightgreen;
+  }
+  .nav-bar {
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: row;
+    min-height: 100px;
+  }
+  .nav-bar-component {
+    display: flex;
+    flex: 1;
+    min-height: 70px;
+  }
+  .red {
+    background-color : red;
+  }
+  .blue {
+    background-color : blue;
+  }
+  .green {
+    background-color : green;
+  }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div class="nav-bar">
+    <div class="nav-bar-component red"></div>
+    <div class="nav-bar-component blue"></div>
+    <div class="nav-bar-component green"></div>
+  </div>
+      <h1>Hello World</h1>
+      {{ yield }}
+  </div>
+</body>
+</html>

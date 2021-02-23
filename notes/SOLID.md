@@ -17,3 +17,4 @@ I - Interface Segregation Principle
 D - Dependency Inversion
 
 객체 말고 인터페이스로 관계를 정의 해라
+

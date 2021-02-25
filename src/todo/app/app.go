@@ -2,99 +2,100 @@ package app
 
 import (
 	"net/http"
+	"os"
 	"strconv"
-	"time"
 
+	"github.com/bombamong/go_study/src/todo/model"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 	"github.com/unrolled/render"
+	"github.com/urfave/negroni"
 )
 
-type Todo struct {
-	ID        int       `json:"id"`
-	Name      string    `json:"name"`
-	Completed bool      `json:"completed"`
-	CreatedAt time.Time `json:"created_at"`
+var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
+
+var rd = render.New()
+
+type AppHandler struct {
+	http.Handler
+	db model.DBHandler
 }
 
-var todoMap map[int]*Todo
-var rd *render.Render
+func getSessionID(r *http.Request) string {
+	session, err := store.Get(r, "session")
+	if err != nil {
+		return ""
+	}
+	val := session.Values["id"]
+	if val == nil {
+		return ""
+	}
+	return val.(string)
+}
 
-func indexHandler(w http.ResponseWriter, r *http.Request) {
+func (a *AppHandler) indexHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/todo.html", http.StatusTemporaryRedirect)
 }
 
-func addTestTodo() {
-	todoMap[1] = &Todo{
-		ID:        1,
-		Name:      "do something",
-		Completed: false,
-		CreatedAt: time.Now(),
-	}
-	todoMap[2] = &Todo{
-		ID:        2,
-		Name:      "do something else",
-		Completed: true,
-		CreatedAt: time.Now(),
-	}
-	todoMap[3] = &Todo{
-		ID:        3,
-		Name:      "do something else yey",
-		Completed: false,
-		CreatedAt: time.Now(),
-	}
-}
-
-func getTodoListHandler(w http.ResponseWriter, r *http.Request) {
-	list := []*Todo{}
-	for _, v := range todoMap {
-		list = append(list, v)
-	}
+func (a *AppHandler) getTodoListHandler(w http.ResponseWriter, r *http.Request) {
+	list := a.db.GetTodos()
 	rd.JSON(w, http.StatusOK, list)
 }
 
-func addTodoListHandler(w http.ResponseWriter, r *http.Request) {
+func (a *AppHandler) addTodoListHandler(w http.ResponseWriter, r *http.Request) {
 	todoName := r.FormValue("name")
-	todo := &Todo{ID: len(todoMap) + 1, Name: todoName, CreatedAt: time.Now(), Completed: false}
-	todoMap[todo.ID] = todo
-	rd.JSON(w, http.StatusOK, todo)
+	todo := a.db.AddTodo(todoName)
+	rd.JSON(w, http.StatusCreated, todo)
 }
 
 type Success struct {
 	Success bool `json:"success"`
 }
 
-func removeTodoHandler(w http.ResponseWriter, r *http.Request) {
+func (a *AppHandler) removeTodoHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
-	if _, ok := todoMap[id]; ok {
-		delete(todoMap, id)
+	ok := a.db.RemoveTodo(id)
+	if ok {
 		rd.JSON(w, http.StatusOK, Success{true})
 	} else {
 		rd.JSON(w, http.StatusOK, Success{false})
 	}
 }
 
-func completeTodoHandler(w http.ResponseWriter, r *http.Request) {
+func (a *AppHandler) completeTodoHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	complete := r.FormValue("completed") == "true"
-	if todo, ok := todoMap[id]; ok {
-		todo.Completed = complete
+	ok := a.db.CompleteTodo(id, complete)
+	if ok {
 		rd.JSON(w, http.StatusOK, Success{true})
 	} else {
 		rd.JSON(w, http.StatusOK, Success{false})
 	}
 }
 
-func MakeNewHandler() http.Handler {
-	todoMap = make(map[int]*Todo)
-	addTestTodo()
-	rd = render.New()
+func (a *AppHandler) Close() {
+	a.db.Close()
+}
+
+func MakeNewHandler(filepath string) *AppHandler {
 	r := mux.NewRouter()
-	r.HandleFunc("/todos", addTodoListHandler).Methods("POST")
-	r.HandleFunc("/todos", getTodoListHandler).Methods("GET")
-	r.HandleFunc("/todos/{id:[0-9]+}", removeTodoHandler).Methods("DELETE")
-	r.HandleFunc("/complete-todo/{id:[0-9]+}", completeTodoHandler).Methods("GET")
-	r.HandleFunc("/", indexHandler)
-	return r
+	n := negroni.Classic()
+	n.UseHandler(r)
+
+	a := &AppHandler{
+		Handler: r,
+		db:      model.NewDBHandler(filepath),
+	}
+
+	r.HandleFunc("/todos", a.addTodoListHandler).Methods("POST")
+	r.HandleFunc("/todos", a.getTodoListHandler).Methods("GET")
+	r.HandleFunc("/todos/{id:[0-9]+}", a.removeTodoHandler).Methods("DELETE")
+	r.HandleFunc("/complete-todo/{id:[0-9]+}", a.completeTodoHandler).Methods("GET")
+	r.HandleFunc("/", a.indexHandler)
+	r.HandleFunc("/auth/google/login", googleLoginHandler)
+	r.HandleFunc("/auth/google/callback", googleAuthCallback)
+
+	return a
 }

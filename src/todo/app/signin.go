@@ -104,6 +104,7 @@ func googleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	//
 	// 유저 정보 출력
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }

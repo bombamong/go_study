@@ -12,7 +12,7 @@ func main() {
 	defer m.Close()
 
 	fmt.Println("Listening on localhost:3000")
-	err := http.ListenAndServe(":3000", n)
+	err := http.ListenAndServe(":3000", m)
 	if err != nil {
 		panic(err)
 	}

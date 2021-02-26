@@ -12,7 +12,7 @@ func newMemoryHandler() DBHandler {
 	return m
 }
 
-func (m *memoryHandler) GetTodos() []*Todo {
+func (m *memoryHandler) GetTodos(sessionID string) []*Todo {
 	list := []*Todo{}
 	for _, v := range m.todoMap {
 		list = append(list, v)
@@ -20,7 +20,7 @@ func (m *memoryHandler) GetTodos() []*Todo {
 	return list
 }
 
-func (m *memoryHandler) AddTodo(name string) *Todo {
+func (m *memoryHandler) AddTodo(sessionID, name string) *Todo {
 	id := len(m.todoMap) + 1
 	todo := &Todo{
 		ID:        id,

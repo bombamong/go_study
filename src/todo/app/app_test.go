@@ -15,6 +15,11 @@ import (
 )
 
 func TestTodos(t *testing.T) {
+	// bypass login for testing purposes
+	getSessionID = func(r *http.Request) string {
+		return "123"
+	}
+
 	os.Remove("./test.db")
 	assert := assert.New(t)
 	ah := MakeNewHandler("./test.db")
@@ -57,7 +62,7 @@ func TestTodos(t *testing.T) {
 		}
 	}
 
-	resp, err = http.Get(ts.URL + "/complete-todo/" + strconv.Itoa(id1) + "?completed=true")
+	resp, err = http.Get(ts.URL + "/complete-todo/" + strconv.Itoa(id1) + "?complete=true")
 	assert.NoError(err)
 	assert.Equal(http.StatusOK, resp.StatusCode)
 
@@ -70,7 +75,6 @@ func TestTodos(t *testing.T) {
 	assert.Equal(len(todos), 2)
 	for _, t := range todos {
 		if t.ID == id1 {
-			fmt.Println(t.Completed)
 			assert.True(t.Completed)
 		}
 	}
@@ -85,10 +89,9 @@ func TestTodos(t *testing.T) {
 	todos = []*model.Todo{}
 	err = json.NewDecoder(resp.Body).Decode(&todos)
 	assert.NoError(err)
-	assert.Equal(len(todos), 1)
+	assert.Equal(1, len(todos))
 	for _, t := range todos {
-		fmt.Println(t)
-		assert.Equal(t.ID, id2)
+		assert.Equal(id2, t.ID)
 	}
 
 }
